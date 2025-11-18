@@ -2,16 +2,24 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Путь к базе данных SQLite
+# TODO: Вынести URL базы данных в переменные окружения или config файл
+# Пример: DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./travelnotes.db")
 SQLALCHEMY_DATABASE_URL = "sqlite:///./travelnotes.db"
 
-#  соединение с SQLite
+# TODO: Добавить обработку ошибок подключения к базе данных
+# РЕКОМЕНДАЦИЯ: Обернуть создание engine в try-except блок
+# TODO: Добавить логирование (echo=True в режиме разработки)
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL, 
+    connect_args={"check_same_thread": False}
 )
 
 # Сессии для работы с БД
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Базовый класс для моделей( note будут наследоваться от base)
+# TODO: УСТАРЕЛО! declarative_base() deprecated в SQLAlchemy 2.0
+# ИСПРАВИТЬ: Использовать DeclarativeBase класс вместо declarative_base()
+# from sqlalchemy.orm import DeclarativeBase
+# class Base(DeclarativeBase):
+#     pass
 Base = declarative_base()
