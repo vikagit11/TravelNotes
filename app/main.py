@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException
 # TODO: Добавить импорт для корректной типизации response_model
 # TODO: Добавить импорт Query для валидации query параметров
-# from fastapi import Query, status
+from fastapi import Query, status
 from sqlalchemy.orm import Session
 # TODO: Добавить импорт для обработки списков в response_model
-# from typing import List
+from typing import List
 from . import models, schemas, database
 from .database import Base, engine
 
@@ -17,13 +17,12 @@ Base.metadata.create_all(bind=engine)
 
 
 # TODO: Добавить метаданные приложения для автодокументации
-# app = FastAPI(
-#     title="TravelNotes API",
-#     description="API для управления заметками о путешествиях",
-#     version="1.0.0",
-#     contact={"name": "Support", "email": "support@travelnotes.com"}
-# )
-app = FastAPI()
+app = FastAPI(
+     title="TravelNotes API",
+     description="API для управления заметками о путешествиях",
+     version="1.0.0",
+     contact={"name": "Support", "email": "support@travelnotes.com"}
+ )
 
 # TODO: Добавить middleware для логирования запросов
 
@@ -35,12 +34,17 @@ app = FastAPI()
 # Функция для подключения к базе
 # TODO: Добавить docstring
 def get_db():
+    """
+    Функция для подключения к базе данных. Подключает - и после завершения запроса - закрывает.
+    
+    """
     db = database.SessionLocal()
     try:
         yield db
     finally:
         db.close()
-        # TODO: Добавить логирование закрытия сессии в debug режиме
+         # TODO: Добавить логирование закрытия сессии в debug режиме
+        print("Сессия базы данных закрыта")
 
 
 # маршруты
@@ -49,6 +53,9 @@ def get_db():
 # TODO: Добавить теги для группировки в документации
 @app.get("/")
 def read_root():
+    """
+    Базовый ендпоинт ддля проверки работы api.Возвращает статус работы приложения.
+    """
     # УЛУЧШЕНИЕ: Добавить информацию о версии API и доступных эндпоинтах
     return {"message": "Приложение TravelNotes работает!"}
 
@@ -59,7 +66,7 @@ def read_root():
 # TODO: Добавить пагинацию с skip и limit параметрами
 # TODO: Добавить сортировку по дате создания или приоритету
 # TODO: Добавить фильтрацию по is_done
-@app.get("/notes")
+@app.get("/notes", response_model=List[schemas.NoteResponse])
 # TODO: Добавить response_model=List[schemas.Note]
 # TODO: Добавить tags=["notes"] для документации
 def read_notes(db: Session = Depends(get_db)):
@@ -73,7 +80,7 @@ def read_notes(db: Session = Depends(get_db)):
 # БАГ КРИТИЧЕСКИЙ: Не используется Pydantic схема для валидации!
 # БАГ: Параметры передаются как query params вместо request body
 # TODO: ИСПРАВИТЬ: Использовать schemas.NoteCreate в теле запроса
-@app.post("/notes")
+@app.post("/notes", response_model=schemas.NoteResponse, status_code=status.HTTP_201_CREATED)
 # TODO: Добавить response_model=schemas.Note, status_code=status.HTTP_201_CREATED
 # TODO: ИСПРАВИТЬ сигнатуру: def create_note(note: schemas.NoteCreate, db: Session = Depends(get_db)):
 def create_note(title: str, description: str | None = None, db: Session = Depends(get_db)):
@@ -92,7 +99,7 @@ def create_note(title: str, description: str | None = None, db: Session = Depend
 # TODO: Добавить поиск также по description
 # TODO: Добавить валидацию query параметра (минимальная длина)
 # TODO: Сделать query обязательным или вернуть ошибку если пустой
-@app.get("/notes/search")
+@app.get("/notes/search", response_model=List[schemas.NoteResponse])
 # TODO: Добавить response_model=List[schemas.Note]
 # ПРОБЛЕМА: Этот эндпоинт должен быть ПЕРЕД /notes/{id} если добавите его в будущем
 def search_notes(query: str, db: Session = Depends(get_db)):
@@ -108,7 +115,7 @@ def search_notes(query: str, db: Session = Depends(get_db)):
 # ПРОБЛЕМА АРХИТЕКТУРНАЯ: Неправильный подход - обновление по частичному совпадению title
 # TODO: ИСПРАВИТЬ: Создать эндпоинт PUT /notes/{id} для обновления конкретной заметки
 # TODO: ИСПРАВИТЬ: Использовать schemas.NoteUpdate в теле запроса
-@app.put("/notes/update_by_title")
+@app.put("/notes/update_by_title", response_model=List[schemas.NoteResponse])
 # TODO: Добавить response_model=List[schemas.Note]
 def update_note_status_by_title(title_query: str, is_done: bool, db: Session = Depends(get_db)):
     # БАГ: Находит несколько заметок и обновляет все - опасное поведение!
@@ -121,9 +128,9 @@ def update_note_status_by_title(title_query: str, is_done: bool, db: Session = D
     # TODO: ИСПРАВИТЬ: Вынести db.commit() за пределы цикла
     for note in notes:
         note.is_done = is_done
-        db.commit()  # БАГ: commit в цикле!
+       #  # БАГ: commit в цикле!
         db.refresh(note)
-    # ПРАВИЛЬНО: db.commit() здесь, один раз после цикла
+        db.commit() 
     
     return notes
 
@@ -131,26 +138,26 @@ def update_note_status_by_title(title_query: str, is_done: bool, db: Session = D
 # TODO: ДОБАВИТЬ ОТСУТСТВУЮЩИЕ CRUD операции:
 
 # TODO: Обновить заметку по ID (правильный способ!)
-# @app.put("/notes/{note_id}", response_model=schemas.Note)
-# def update_note(note_id: int, note_update: schemas.NoteUpdate, db: Session = Depends(get_db)):
-#     note = db.query(models.Note).filter(models.Note.id == note_id).first()
-#     if not note:
-#         raise HTTPException(status_code=404, detail="Заметка не найдена")
-#     for key, value in note_update.dict(exclude_unset=True).items():
-#         setattr(note, key, value)
-#     db.commit()
-#     db.refresh(note)
-#     return note
+@app.put("/notes/{note_id}", response_model=schemas.NoteResponse)
+def update_note(note_id: int, note_update: schemas.NoteUpdate, db: Session = Depends(get_db)):
+    note = db.query(models.Note).filter(models.Note.id == note_id).first()
+    if not note:
+        raise HTTPException(status_code=404, detail="Заметка не найдена")
+    for key, value in note_update.dict(exclude_unset=True).items():
+        setattr(note, key, value)
+    db.commit()
+    db.refresh(note)
+    return note
 
 # TODO: Удалить заметку по ID
-# @app.delete("/notes/{note_id}", status_code=status.HTTP_204_NO_CONTENT)
-# def delete_note(note_id: int, db: Session = Depends(get_db)):
-#     note = db.query(models.Note).filter(models.Note.id == note_id).first()
-#     if not note:
-#         raise HTTPException(status_code=404, detail="Заметка не найдена")
-#     db.delete(note)
-#     db.commit()
-#     return None
+@app.delete("/notes/{note_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_note(note_id: int, db: Session = Depends(get_db)):
+    note = db.query(models.Note).filter(models.Note.id == note_id).first()
+    if not note:
+        raise HTTPException(status_code=404, detail="Заметка не найдена")
+    db.delete(note)
+    db.commit()
+    return None
 
 # TODO: Вынести всю бизнес-логику в отдельный слой (services)
 # АРХИТЕКТУРА: Сейчас логика смешана с роутами - плохая практика

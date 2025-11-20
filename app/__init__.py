@@ -14,9 +14,9 @@ TODO: Добавить версию приложения
 """
 
 # TODO: Раскомментировать когда добавите версионирование
-# __version__ = "1.0.0"
+__version__ = "1.0.0"
 
 # TODO: Раскомментировать для удобного импорта
-# from .models import Note
-# from .schemas import NoteCreate, NoteUpdate, NoteResponse
-# from .database import get_db, Base, engine
+from .models import Note
+#from .schemas import NoteCreate, NoteUpdate, NoteResponse
+#from .database import get_db, Base, engine
