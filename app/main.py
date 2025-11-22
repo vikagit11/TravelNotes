@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi import Query, status
 from sqlalchemy.orm import Session
 # TODO: Добавить импорт для обработки списков в response_model
-from typing import List
+from typing import List, Optional
 from . import models, schemas, database
 from .database import Base, engine
 
@@ -83,7 +83,7 @@ def read_notes(db: Session = Depends(get_db)):
 @app.post("/notes", response_model=schemas.NoteResponse, status_code=status.HTTP_201_CREATED)
 # TODO: Добавить response_model=schemas.Note, status_code=status.HTTP_201_CREATED
 # TODO: ИСПРАВИТЬ сигнатуру: def create_note(note: schemas.NoteCreate, db: Session = Depends(get_db)):
-def create_note(title: str, description: str | None = None, db: Session = Depends(get_db)):
+def create_note(title: str, description: Optional[str] = None, db: Session = Depends(get_db)):
     # TODO: Добавить проверку на дубликаты заметок с одинаковым title
     # TODO: Добавить валидацию длины title и description
     # TODO: Добавить try-except для обработки ошибок БД
