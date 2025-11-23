@@ -16,9 +16,6 @@ engine = create_engine(
 # Сессии для работы с БД
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# TODO: УСТАРЕЛО! declarative_base() deprecated в SQLAlchemy 2.0
-# ИСПРАВИТЬ: Использовать DeclarativeBase класс вместо declarative_base()
-# from sqlalchemy.orm import DeclarativeBase
 class Base(DeclarativeBase):
     pass
 
