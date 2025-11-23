@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from pydantic import Field, validator
 from datetime import datetime
+from typing import Optional
 
 
 # Базовая схема: общие поля для всех заметок
@@ -9,8 +10,11 @@ class NoteBase(BaseModel):
     Базовая схема: общие поля для всех заметок
     """
     title: str = Field(..., min_length=1, max_length=200, description="Название заметки")
-    # БАГ: title может быть пустой строкой - нет минимальной длины   
-    description: str | None = Field(None, max_length=1000, description="Описание заметки")
+    # БАГ: title может быть пустой строкой - нет минимальной длины
+    
+    
+    # TODO: Добавить валидацию длины description
+    description: Optional[str] = Field(None, max_length=1000, description="Описание заметки")
     
 # создание новой заметки (наследует NoteBase)
 # УЛУЧШЕНИЕ: Можно добавить дополнительные поля только для создания
@@ -32,9 +36,9 @@ class NoteUpdate(BaseModel):
     """
     Схема для обновления заметки
     """
-    title: str | None = None
-    description: str | None = None
-    is_done: bool | None = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    is_done: Optional[bool] = None
 # ПРИЧИНА: Сейчас нет возможности частичного обновления через API
 
 
@@ -64,6 +68,6 @@ class NoteFilter(BaseModel):
     """
     skip: int = 0
     limit: int = 100
-    is_done: bool | None = None
-    search: str | None = None
+    is_done: Optional[bool] = None
+    search: Optional[str] = None
 
