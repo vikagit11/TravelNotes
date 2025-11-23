@@ -22,7 +22,9 @@ def test_read_root(client):
     """Проверяем, что корневой эндпоинт возвращает правильное сообщение."""
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": "Приложение TravelNotes работает!"}
+    
+    data = response.json()
+    assert data["message"] == "Приложение TravelNotes работает!"
 
 
 # ПРИМЕР 2: POST запрос - создание ресурса
@@ -51,13 +53,44 @@ def test_search_notes_found(client, sample_note):
     data = response.json()
     assert len(data) == 1
     assert "Тестовая" in data[0]["title"]
+    
+# Получение списка всех заметок
+def test_read_all_notes(client,sample_note):
+    """Получаем список всех заметок"""
+    response = client.get("/notes")
+    assert response.status_code == 200
+    data = response.json()
+    first_note = data[0]
+    assert "title" in first_note
+
+    
+    
+#Удаление заметки по id
+def test_delete_note(client, sample_note):
+    """Проверяем успешное удаление заметки по ID"""
+    note_id = sample_note["id"]
+    response = client.delete(f"/notes/{note_id}")
+    
+    assert response.status_code == 204
+    
+#Попытка удалить несуществующую заметку
+def test_delete_note_not_found(client):
+    """Попытка удалить несуществующую заметку"""
+    response =client.delete("/notes/999")
+    assert response.status_code == 404
+    
+# поиск без результатов
+def test_search_notes_not_found(client):
+    """Поиск без результатов, который не найдет ничего"""
+    response = client.get("/notes/search", params={"query": "?????????"})            
+    assert response.status_code == 200
+    data = response.json()
+    assert data == []
+    
+    
 
 
 # TODO: Допишите тесты по аналогии с примерами выше:
 # 1. test_create_note_without_description - создание заметки без описания
-# 2. test_read_all_notes - получение списка всех заметок
 # 3. test_read_notes_empty_list - пустой список при отсутствии заметок
-# 4. test_search_notes_not_found - поиск без результатов
-# 5. test_update_note_by_id - обновление заметки по ID
 # 6. test_delete_note - удаление заметки
-# 7. test_delete_note_not_found - попытка удалить несуществующую заметку

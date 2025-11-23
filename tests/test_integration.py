@@ -39,6 +39,7 @@ def test_full_crud_workflow(client):
     final_response = client.get("/notes")
     assert len(final_response.json()) == 0
 
+    
 
 # TODO: Допишите интеграционные тесты:
 # 1. test_create_and_search_workflow - создание и поиск нескольких заметок

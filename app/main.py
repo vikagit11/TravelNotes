@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from . import models, schemas, database, version
 from .database import Base, engine
+from typing import Optional
 
 
 import logging
@@ -50,8 +51,7 @@ def get_db():
 
 # маршруты
 
-# TODO: Добавить response_model для всех эндпоинтов
-@app.get("/", tags=["info"])
+@app.get("/", response_model = schemas.InfoResponse, tags=["info"])
 def read_root():
     """
     Базовый ендпоинт для проверки работы api.Возвращает: - статус работы приложения,
@@ -59,7 +59,7 @@ def read_root():
                                                           - список основных эндпоинтов.
     """
     # Информацию о версии API и доступных эндпоинтах
-    return {"message": "Приложение TravelNotes работает",
+    return {"message": "Приложение TravelNotes работает!",
             "status": "ok",
             "version": "1.0.0",
             "endpoints": [
@@ -82,21 +82,21 @@ def read_notes(db: Session = Depends(get_db),
 
 
 # Создать новую заметку
-# БАГ КРИТИЧЕСКИЙ: Не используется Pydantic схема для валидации!
-# БАГ: Параметры передаются как query params вместо request body
-@app.post("/notes", response_model=schemas.NoteCreate, status_code=status.HTTP_201_CREATED,tags=["notes"] )
-def create_note(note: schemas.NoteCreate, db: Session = Depends(get_db)):
+@app.post("/notes", response_model=schemas.NoteResponse, status_code=status.HTTP_201_CREATED,tags=["notes"] )
+def create_note( title: str,                                   
+                 description: Optional[str] = None,
+                 db: Session = Depends(get_db)):
     # проверка на дубликаты заметок с одинаковым title
-    existing = db.query(models.Note).filter(models.Note.title == note.title).first()
+    existing = db.query(models.Note).filter(models.Note.title == title).first()
     if existing:
         raise HTTPException(status_code=400, detail="Заметка с таким названием уже существует")
     # валидация длины title и description
-    if len(note.title.strip()) < 3:
+    if len(title.strip()) < 3:
         raise HTTPException(status_code=400, detail="Название слишком короткое")
-    if note.description is not None and len(note.description.strip()) < 3:
+    if description is not None and len(description.strip()) < 3:
         raise HTTPException(status_code=400, detail="Описание слишком короткое")
     # TODO: Добавить try-except для обработки ошибок БД
-    new_note = models.Note(title=note.title, description=note.description)
+    new_note = models.Note(title=title, description=description)
     db.add(new_note)
     # TODO: Обернуть commit в try-except для отката транзакции при ошибке
     db.commit()
@@ -130,14 +130,13 @@ def update_note_status_by_title(title_query: str, is_done: bool, db: Session = D
     if not notes:
         raise HTTPException(status_code=404, detail="Заметки не найдены")
     
-    
     for note in notes:
         note.is_done = is_done
         db.refresh(note)
         db.commit() 
     return notes
 
-# Обновить заметку по ID (правильный способ!)
+# Обновить заметку по ID 
 @app.put("/notes/{note_id}", response_model=schemas.NoteResponse, tags=["notes"])
 def update_note(note_id: int, note_update: schemas.NoteUpdate, db: Session = Depends(get_db)):
     note = db.query(models.Note).filter(models.Note.id == note_id).first()
@@ -150,7 +149,7 @@ def update_note(note_id: int, note_update: schemas.NoteUpdate, db: Session = Dep
     return note
 
 # Удалить заметку по ID
-@app.delete("/notes/{note_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["notes"])
+@app.delete("/notes/{note_id}",response_model=None, status_code=status.HTTP_204_NO_CONTENT, tags=["notes"])
 def delete_note(note_id: int, db: Session = Depends(get_db)):
     note = db.query(models.Note).filter(models.Note.id == note_id).first()
     if not note:
@@ -165,8 +164,6 @@ def delete_note(note_id: int, db: Session = Depends(get_db)):
 
 
 
-# TODO: Добавить тесты (pytest)
-# КРИТИЧНО: Нет ни одного теста!
 
 # TODO: Добавить обработку ошибок базы данных
 # TODO: Добавить аутентификацию и авторизацию если требуется

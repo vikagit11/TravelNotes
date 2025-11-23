@@ -12,7 +12,6 @@ TODO: Добавить экспорт основных компонентов д
 
 version= "1.0.0"
 
-# TODO: Раскомментировать для удобного импорта
 from .models import Note
-#from .schemas import NoteCreate, NoteUpdate, NoteResponse
+from .schemas import NoteCreate, NoteUpdate, NoteResponse
 #from .database import get_db, Base, engine

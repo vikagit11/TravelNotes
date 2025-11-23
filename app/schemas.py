@@ -10,11 +10,15 @@ class NoteBase(BaseModel):
     Базовая схема: общие поля для всех заметок
     """
     title: str = Field(..., min_length=1, max_length=200, description="Название заметки")
-    # БАГ: title может быть пустой строкой - нет минимальной длины
-    
-    
-    # TODO: Добавить валидацию длины description
     description: Optional[str] = Field(None, max_length=1000, description="Описание заметки")
+    
+#схема для главной страницы
+class InfoResponse(BaseModel):
+    """Схема для главной страницы"""
+    message: str
+    status: str
+    version: str
+    endpoints: list[str]    
     
 # создание новой заметки (наследует NoteBase)
 # УЛУЧШЕНИЕ: Можно добавить дополнительные поля только для создания
