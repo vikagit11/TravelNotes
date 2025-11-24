@@ -61,7 +61,7 @@ def read_root():
     # Информацию о версии API и доступных эндпоинтах
     return {"message": "Приложение TravelNotes работает!",
             "status": "ok",
-            "version": "1.0.0",
+            "version": "1.0.0",  # TODO использовать переменную из __init__.py
             "endpoints": [
                 "/notes",
                 "/notes/{id}",
@@ -166,6 +166,4 @@ def delete_note(note_id: int, db: Session = Depends(get_db)):
 
 
 # TODO: Добавить обработку ошибок базы данных
-# TODO: Добавить аутентификацию и авторизацию если требуется
-
 
