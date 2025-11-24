@@ -5,15 +5,100 @@
 Основной функционал: - Создание новой заметки
                      - Поиск заметки по ключевому слову
                      - Отмечать выполненную заметку
+                     - Получение списка всех заметок
+                     - Удаление заметки по ID
+Технологии:
+           - PYTHON 3.13.3
+           - FASTAPI
+           - SQLALCHEMY
+           - PYDANTIC
+           - SQLITE
+           - PYTEST
 
-<!-- TODO: Добавить секцию "Установка и запуск" с подробными инструкциями -->
+Структура проекта:
+                    TravelNotes/
+                    │── app/
+                    │   ├── __init__.py
+                    │   ├── main.py
+                    │   ├── database.py
+                    │   ├── models.py
+                    │   ├── schemas.py
+                    │   └── services/
+                    │
+                    │── tests/
+                    │   │── __init__.py
+                    │   ├── test_notes.py
+                    │   ├── test_integration.py
+                    │   └── conftest.py
+                    │   └── README.md 
+                    │── requirements.txt
+                    │── README.md          
+
+Установка и запуск: 
+                    - Клонировать репозиторий
+                      (git clone https://github.com/vikagit11/TravelNotes.git
+                      cd TravelNotes)
+                    - Создать и активировать виртуальное окружение(python -m venv venv, venv\Scripts\activate)
+                    - Установить зависимости(pip install -r requirements.txt)
+                    - Запустить приложение(uvicorn app.main:app --reload)
+                    - После запуска API доступно по адресу: http://localhost:8000
+                    - Документация SWAGGER: http://localhost:8000/docs 
+
+Будущие улучшения:
+                  - Добавить регистрацию и авторизацию 
+                  - Добавить middleware для логирования запросов
+                  - Перенести создание таблиц под Alembic
+                  - Добавить обработку ошибок базы данных
+                  - Разнести бизнес-логику в services
+                  
+Тестирование:
+             - Запустить все тесты:
+               pytest
+             - Запустить тесты с подробным выводом:
+               pytest -v
+             - Запустить конкретный файл:
+               pytest tests/test_notes.py
+             - Запустить конкретный тест:
+               pytest tests/test_notes.py::test_create_note_success
+             - Запустить тесты с покрытием кода:
+               python -m pytest tests/ --cov=app --cov-report=term-missing
+
+Примеры запросов и ответов API:
+                               - Создание новой заметки
+                                 POST/notes
+                                Запрос :
+                                {
+    "title": "Поездка в Париж",
+    "description": "Посетить Эйфелеву башню"
+                                }
+
+
+                                Ответ (201 created):
+                                  {
+  "title": "\"Поездка в Париж\"",
+  "description": "\"Посетить Эйфелеву башню\"",
+  "id": 4,
+  "is_done": false,
+  "created_at": "2025-11-23T22:26:30.455823",
+  "updated_at": "2025-11-23T22:26:30.456383"
+}  
+
+
+                                - Поиск заметок по ключевому слову
+                                GET/notes/search?query=Париж
+
+                                Ответ (200 ok):
+ [
+  {
+    "title": "\"Поездка в Париж\"",
+    "description": "\"Посетить Эйфелеву башню\"",
+    "id": 4,
+    "is_done": false,
+    "created_at": "2025-11-23T22:26:30.455823",
+    "updated_at": "2025-11-23T22:26:30.456383"
+  }
+]                                  
 <!-- TODO: Добавить примеры использования API (curl или httpie команды) -->
-<!-- TODO: Добавить ссылку на Swagger документацию (http://localhost:8000/docs) -->
-<!-- TODO: Добавить информацию о структуре проекта -->
-<!-- TODO: Добавить секцию "Технологии" (FastAPI, SQLAlchemy, Pydantic, SQLite) -->
-<!-- TODO: Добавить примеры запросов и ответов API -->
-<!-- TODO: Добавить информацию о тестировании -->
-<!-- TODO: Добавить секцию "Будущие улучшения" -->
 <!-- TODO: Добавить информацию о контрибьюции -->
 <!-- TODO: Исправить форматирование - список функционала должен быть в markdown формате -->
 

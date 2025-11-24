@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 # TODO: Вынести URL базы данных в переменные окружения или config файл
 # Пример: DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./travelnotes.db")
@@ -17,9 +16,6 @@ engine = create_engine(
 # Сессии для работы с БД
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# TODO: УСТАРЕЛО! declarative_base() deprecated в SQLAlchemy 2.0
-# ИСПРАВИТЬ: Использовать DeclarativeBase класс вместо declarative_base()
-# from sqlalchemy.orm import DeclarativeBase
-# class Base(DeclarativeBase):
-#     pass
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
+
