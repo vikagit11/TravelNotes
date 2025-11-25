@@ -204,7 +204,7 @@ def create_note_service(note_data: schemas.NoteCreate, db: Session):
 ### 2. **Эндпоинт /notes/search должен быть ПЕРЕД /notes/{note_id}**
 
 **Файл:** `app/main.py:57-59`
-
+ss
 ```python
 # ❌ Потенциальная проблема с роутингом
 @app.get("/notes/search", ...)  # строка 57

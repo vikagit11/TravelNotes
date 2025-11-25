@@ -12,11 +12,7 @@ logger = logging.getLogger(__name__)                        #система ло
 
 
 # Создаём таблицы, если их ещё нет
-# TODO: Переместить создание таблиц в отдельную функцию инициализации или Alembic миграции
-# ПРОБЛЕМА: При каждом запуске пытается создать таблицы - не best practice
-# РЕКОМЕНДАЦИЯ: Использовать Alembic для управления миграциями БД
 Base.metadata.create_all(bind=engine)
-
 
 app = FastAPI(
      title="TravelNotes API",
@@ -25,8 +21,6 @@ app = FastAPI(
      contact={"name": "Support", "email": "support@travelnotes.com"},
      debug = True
  )
-
-# TODO: Добавить middleware для логирования запросов
 
 # обработчики ошибок
 @app.exception_handler(Exception)
@@ -54,23 +48,22 @@ def read_notes(db: Session = Depends(get_db),
 
 
 # Создать новую заметку
-@app.post("/notes", response_model=schemas.NoteResponse, status_code=status.HTTP_201_CREATED,tags=["notes"] )
-def create_note( title: str,                                   
-                 description: Optional[str] = None,
-                 db: Session = Depends(get_db)):
-    return  create_note_service(title, description, db)
+@app.post("/notes",response_model=schemas.NoteResponse,status_code=status.HTTP_201_CREATED, tags=["notes"])
+def create_note(title: str = Query(..., min_length=1),description: Optional[str] = Query(None),db: Session = Depends(get_db)):
+    note_data = schemas.NoteCreate(title=title,description=description)
+    return create_note_service(note_data, db)
 
 
 # Поиск заметок по слову в названии (без учёта регистра)
 @app.get("/notes/search", response_model=List[schemas.NoteResponse], tags=["notes"])
-def search_notes(query: str, db: Session = Depends(get_db)):
+def search_notes(query: str = Query(..., min_length=3), db: Session = Depends(get_db)):
     return search_notes_service(query, db)
+
  
 # Обновить заметку по ID 
 @app.put("/notes/{note_id}", response_model=schemas.NoteResponse, tags=["notes"])
 def update_note(note_id: int, note_update: schemas.NoteUpdate, db: Session = Depends(get_db)):
     return update_note_service(note_id, note_update, db)
-
 
 # Удалить заметку по ID
 @app.delete("/notes/{note_id}",response_model=None, status_code=status.HTTP_204_NO_CONTENT, tags=["notes"])

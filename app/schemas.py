@@ -21,14 +21,12 @@ class InfoResponse(BaseModel):
     endpoints: list[str]    
     
 
-# УЛУЧШЕНИЕ: Можно добавить дополнительные поля только для создания
-# Например: tags, priority, deadline
 class NoteCreate(NoteBase):
     """
     Схема для создания новой заметки
     """
     pass
-    # валидацию данных
+    # валидация данных
     @validator('title')
     def title_must_not_be_empty(cls, v):
         if not v or not v.strip():
@@ -58,11 +56,7 @@ class NoteResponse(NoteBase):
       
     class Config:
         from_attributes = True
-        
-        # УЛУЧШЕНИЕ: Добавить дополнительные настройки
-    #json_encoders = {datetime: lambda v: v.isoformat()}
-    #validate_assignment = True
-
+          
 
 class NoteFilter(BaseModel):
     """

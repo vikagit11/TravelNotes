@@ -12,9 +12,3 @@ venv/
 
 # VS Code
 .vscode/
-
-# TODO: Добавить специфичные для проекта файлы
-# travelnotes.db - уже включено выше
-
-# TODO: Рассмотреть использование .gitignore шаблона для Python из GitHub
-# https://github.com/github/gitignore/blob/main/Python.gitignore

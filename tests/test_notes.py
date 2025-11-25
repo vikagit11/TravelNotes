@@ -62,8 +62,6 @@ def test_read_all_notes(client,sample_note):
     data = response.json()
     first_note = data[0]
     assert "title" in first_note
-
-    
     
 #Удаление заметки по id
 def test_delete_note(client, sample_note):
@@ -90,7 +88,4 @@ def test_search_notes_not_found(client):
     
 
 
-# TODO: Допишите тесты по аналогии с примерами выше:
-# 1. test_create_note_without_description - создание заметки без описания
-# 3. test_read_notes_empty_list - пустой список при отсутствии заметок
-# 6. test_delete_note - удаление заметки
+

@@ -6,7 +6,6 @@
 
 import pytest
 
-
 def test_full_crud_workflow(client):
     """Тест полного цикла CRUD: Create -> Read -> Update -> Delete"""
     # 1. Создаём заметку
@@ -41,7 +40,3 @@ def test_full_crud_workflow(client):
 
     
 
-# TODO: Допишите интеграционные тесты:
-# 1. test_create_and_search_workflow - создание и поиск нескольких заметок
-# 2. test_empty_database_all_endpoints - проверка всех эндпоинтов на пустой БД
-# 3. test_multiple_updates_workflow - несколько обновлений одной заметки подряд

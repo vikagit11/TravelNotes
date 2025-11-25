@@ -1,10 +1,11 @@
 from app import version
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException, Query, status 
+from sqlalchemy import or_
+from sqlalchemy.exc import SQLAlchemyError
+from fastapi import Depends, HTTPException
 from app import models, schemas, database, version
-from app.database import get_db
-
+from app.database import get_db, logger
 
 
 def get_root_info():
@@ -36,34 +37,22 @@ def get_notes(db: Session = Depends(get_db),
             return query.offset(skip).limit(limit).all() 
         
         
-def create_note_service( title: str,                                   
-                 description: Optional[str] = None,
-                 db: Session = Depends(get_db)):
+      
+def create_note_service(note_data: schemas.NoteCreate, db: Session):
     """Создает новую заметку"""
-    # проверка на дубликаты заметок с одинаковым title
-    existing = db.query(models.Note).filter(models.Note.title == title).first()
+    existing = db.query(models.Note).filter(models.Note.title == note_data.title).first()
     if existing:
         raise HTTPException(status_code=400, detail="Заметка с таким названием уже существует")
-    # валидация длины title и description
-    if len(title.strip()) < 3:
-        raise HTTPException(status_code=400, detail="Название слишком короткое")
-    if description is not None and len(description.strip()) < 3:
-        raise HTTPException(status_code=400, detail="Описание слишком короткое")
     
-    # TODO: КРИТИЧНО! Пустые except без типа и без raise - ошибки "съедаются"
-    # Используйте: except SQLAlchemyError as e: + db.rollback() + raise HTTPException
-    # См. REVIEW_COMMENTS.md секция "Обработка ошибок БД"
     try:
-        new_note = models.Note(title=title, description=description)
+        new_note = models.Note(**note_data.dict())
         db.add(new_note)
-    except:
-        print("Ошибка базы данных")  # TODO: заменить на logger.error() + raise
-    try:
         db.commit()
-    except:
-        print("Ошибка: откат транзакции")  # TODO: добавить db.rollback() + raise
-    db.refresh(new_note)
-    return new_note
+        db.refresh(new_note)
+        return new_note
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Ошибка базы данных")    
 
 
 
@@ -74,11 +63,12 @@ def search_notes_service(query: str, db: Session = Depends(get_db)):
     if len(query.strip()) < 3:
         raise HTTPException(status_code=400, detail="Query too short")
     
-    # TODO: КРИТИЧНО! Синтаксическая ошибка - оператор | не работает для SQLAlchemy
-    # Используйте or_() из sqlalchemy: from sqlalchemy import or_
-    # Правильно: .filter(or_(models.Note.title.ilike(...), models.Note.description.ilike(...)))
-    # См. REVIEW_COMMENTS.md для полного примера кода
-    return db.query(models.Note).filter(models.Note.title.ilike(f"%{query}%" | models.Note.description.ilike(f"%{query}%"))).all() 
+    return db.query(models.Note).filter(
+        or_(
+            models.Note.title.ilike(f"%{query}%"),
+            models.Note.description.ilike(f"%{query}%")
+        )
+    ).all()
 
 
 def update_note_service(note_id: int, note_update: schemas.NoteUpdate, db: Session = Depends(get_db)):
