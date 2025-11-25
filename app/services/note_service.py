@@ -49,15 +49,19 @@ def create_note_service( title: str,
         raise HTTPException(status_code=400, detail="Название слишком короткое")
     if description is not None and len(description.strip()) < 3:
         raise HTTPException(status_code=400, detail="Описание слишком короткое")
+    
+    # TODO: КРИТИЧНО! Пустые except без типа и без raise - ошибки "съедаются"
+    # Используйте: except SQLAlchemyError as e: + db.rollback() + raise HTTPException
+    # См. REVIEW_COMMENTS.md секция "Обработка ошибок БД"
     try:
         new_note = models.Note(title=title, description=description)
         db.add(new_note)
     except:
-        print("Ошибка базы данных")    
+        print("Ошибка базы данных")  # TODO: заменить на logger.error() + raise
     try:
         db.commit()
     except:
-        print("Ошибка: откат транзакции")
+        print("Ошибка: откат транзакции")  # TODO: добавить db.rollback() + raise
     db.refresh(new_note)
     return new_note
 
@@ -65,11 +69,15 @@ def create_note_service( title: str,
 
 def search_notes_service(query: str, db: Session = Depends(get_db)):
     """Поиск заметок"""
-    if not query.strip():                                                                         # проверка, что строка не пустая
+    if not query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
     if len(query.strip()) < 3:
-        raise HTTPException(status_code=400, detail="Query too short")                            # проверка на минимальную длину
-    # УЛУЧШЕНИЕ: Можно добавить поиск по нескольким полям одновременно                            # поиск по title ИЛИ по description
+        raise HTTPException(status_code=400, detail="Query too short")
+    
+    # TODO: КРИТИЧНО! Синтаксическая ошибка - оператор | не работает для SQLAlchemy
+    # Используйте or_() из sqlalchemy: from sqlalchemy import or_
+    # Правильно: .filter(or_(models.Note.title.ilike(...), models.Note.description.ilike(...)))
+    # См. REVIEW_COMMENTS.md для полного примера кода
     return db.query(models.Note).filter(models.Note.title.ilike(f"%{query}%" | models.Note.description.ilike(f"%{query}%"))).all() 
 
 
