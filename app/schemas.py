@@ -20,7 +20,7 @@ class InfoResponse(BaseModel):
     version: str
     endpoints: list[str]    
     
-# создание новой заметки (наследует NoteBase)
+
 # УЛУЧШЕНИЕ: Можно добавить дополнительные поля только для создания
 # Например: tags, priority, deadline
 class NoteCreate(NoteBase):
@@ -43,7 +43,6 @@ class NoteUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     is_done: Optional[bool] = None
-# ПРИЧИНА: Сейчас нет возможности частичного обновления через API
 
 
 #  вывод данных из базы 
