@@ -5,7 +5,7 @@ from . import models, schemas, database, version
 from .database import Base, engine, get_db
 from fastapi.responses import JSONResponse
 from app.services.note_service import get_root_info, get_notes, create_note_service, search_notes_service, update_note_service, delete_note_service
-
+from app.config import DEBUG
 import logging
 
 logger = logging.getLogger(__name__)                        #система логирования
@@ -19,7 +19,7 @@ app = FastAPI(
      description="API для управления заметками о путешествиях",
      version=version,
      contact={"name": "Support", "email": "support@travelnotes.com"},
-     debug = True
+     debug = DEBUG
  )
 
 # обработчики ошибок
